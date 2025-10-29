@@ -4,12 +4,17 @@ const ctx = canvas.getContext('2d');
 // Player properties
 const player = {
   x: 50,
-  y: 50,
+  y: canvas.height - 50, // Start player on the ground
   width: 50,
   height: 50,
   color: 'blue',
-  speed: 2
+  speed: 2,
+  velocityY: 0,
+  isJumping: false,
+  jumpStrength: 15
 };
+
+const gravity = 0.8;
 
 // Function to draw the player
 function drawPlayer() {
@@ -17,24 +22,41 @@ function drawPlayer() {
   ctx.fillRect(player.x, player.y, player.width, player.height);
 }
 
+// Keyboard input handler for jumping
+document.addEventListener('keydown', function(event) {
+  if (event.code === 'Enter' && !player.isJumping) {
+    player.velocityY = -player.jumpStrength;
+    player.isJumping = true;
+  }
+});
+
 // Game loop
 function gameLoop() {
-  // Clear the canvas
+  // Clear the canvas for the next frame
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Move the player
+  // Apply gravity
+  player.velocityY += gravity;
+  player.y += player.velocityY;
+
+  // Ground collision detection
+  if (player.y + player.height > canvas.height) {
+    player.y = canvas.height - player.height; // Snap to ground
+    player.velocityY = 0;
+    player.isJumping = false;
+  }
+
+  // Move the player horizontally
   if (player.x + player.width < canvas.width) {
     player.x += player.speed;
   }
 
-  // Draw the player
+  // Draw the player at its new position
   drawPlayer();
 
-  // Request the next frame
+  // Request the next animation frame
   requestAnimationFrame(gameLoop);
 }
 
-// Start the game loop when the DOM is ready
-document.addEventListener('DOMContentLoaded', (event) => {
-    gameLoop();
-});
+// Start the game loop
+gameLoop();
