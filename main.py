@@ -13,6 +13,10 @@ def index():
 def serve_static(path):
     return send_from_directory("src", path)
 
+@app.route("/public/<path:path>")
+def serve_public(path):
+    return send_from_directory("public", path)
+
 
 def main():
     app.run(port=int(os.environ.get("PORT", 80)))
