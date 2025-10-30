@@ -1,5 +1,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const background = document.getElementById('background');
 
 // Player properties
 const player = {
@@ -15,6 +16,7 @@ const player = {
 };
 
 const gravity = 0.8;
+let backgroundX = 0;
 
 // Function to draw the player
 function drawPlayer() {
@@ -46,10 +48,12 @@ function gameLoop() {
     player.isJumping = false;
   }
 
-  // Move the player horizontally
-  if (player.x + player.width < canvas.width) {
-    player.x += player.speed;
+  // Move the background to give the illusion of player movement
+  backgroundX -= player.speed;
+  if (backgroundX <= -canvas.width) {
+    backgroundX = 0;
   }
+  background.style.backgroundPositionX = backgroundX + 'px';
 
   // Draw the player at its new position
   drawPlayer();
