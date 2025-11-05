@@ -3,44 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Login / Sign Up</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-image: url("/public/game-background.jpg");
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <div class="row">
+    <div class="container">
+        <div class="row justify-content-center">
             <div class="col-md-6">
-                <h2>Login</h2>
-                <form id="loginForm">
-                    <div class="form-group">
-                        <label for="loginPlayername">Playername</label>
-                        <input type="text" class="form-control" id="loginPlayername" required>
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="login-tab" href="#">Login</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="signup-tab" href="#">Sign Up</a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="form-group">
-                        <label for="loginPassword">Password</label>
-                        <input type="password" class="form-control" id="loginPassword" required>
+                    <div class="card-body">
+                        <div id="login-form">
+                            <h5 class="card-title">Login</h5>
+                            <form id="loginForm">
+                                <div class="form-group">
+                                    <label for="loginPlayername">Playername</label>
+                                    <input type="text" class="form-control" id="loginPlayername" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="loginPassword">Password</label>
+                                    <input type="password" class="form-control" id="loginPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </form>
+                        </div>
+                        <div id="signup-form" style="display: none;">
+                            <h5 class="card-title">Sign Up</h5>
+                            <form id="signupForm">
+                                <div class="form-group">
+                                    <label for="signupPlayername">Playername</label>
+                                    <input type="text" class="form-control" id="signupPlayername" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="signupPassword">Password</label>
+                                    <input type="password" class="form-control" id="signupPassword" required>
+                                </div>
+                                <button type="submit" class="btn btn-success">Sign Up</button>
+                            </form>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
-            </div>
-            <div class="col-md-6">
-                <h2>Sign Up</h2>
-                <form id="signupForm">
-                    <div class="form-group">
-                        <label for="signupPlayername">Playername</label>
-                        <input type="text" class="form-control" id="signupPlayername" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="signupPassword">Password</label>
-                        <input type="password" class="form-control" id="signupPassword" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">Sign Up</button>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
+        const loginTab = document.getElementById('login-tab');
+        const signupTab = document.getElementById('signup-tab');
+        const loginForm = document.getElementById('login-form');
+        const signupForm = document.getElementById('signup-form');
+
+        loginTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginTab.classList.add('active');
+            signupTab.classList.remove('active');
+            loginForm.style.display = 'block';
+            signupForm.style.display = 'none';
+        });
+
+        signupTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            signupTab.classList.add('active');
+            loginTab.classList.remove('active');
+            signupForm.style.display = 'block';
+            loginForm.style.display = 'none';
+        });
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const playername = document.getElementById('loginPlayername').value;
