@@ -58,7 +58,8 @@
             alert(data.message);
 
             if (response.ok) {
-                window.location.href = '/';
+                localStorage.setItem('playername', playername);
+                window.location.href = '/game';
             }
         });
 

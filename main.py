@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///games.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'a-very-secret-key'  # It's recommended to change this to a more secure key
+app.config['SECRET_KEY'] = 'a-very-secret-key'
 
 db = SQLAlchemy(app)
 
@@ -19,18 +19,6 @@ class Player(db.Model):
 
     def __repr__(self):
         return f'<Player {self.playername}>'
-
-@app.route("/")
-def index():
-    return send_from_directory("src", "index.html")
-
-@app.route("/<path:path>")
-def serve_static(path):
-    return send_from_directory("src", path)
-
-@app.route("/public/<path:path>")
-def serve_public(path):
-    return send_from_directory("public", path)
 
 @app.route('/signup', methods=['POST'])
 def signup():
@@ -72,10 +60,29 @@ def update_score(playername):
     db.session.commit()
     return jsonify({'message': 'Player data updated!'})
 
+
+@app.route("/")
+def index():
+    return send_from_directory("src", "login.html")
+
+@app.route("/game")
+def game():
+    return send_from_directory("src", "index.html")
+
+@app.route("/public/<path:path>")
+def serve_public(path):
+    return send_from_directory("public", path)
+
+@app.route("/<path:path>")
+def serve_static(path):
+    return send_from_directory("src", path)
+
+
 def main():
     with app.app_context():
         db.create_all()
     app.run(port=int(os.environ.get("PORT", 80)))
+
 
 if __name__ == "__main__":
     main()
