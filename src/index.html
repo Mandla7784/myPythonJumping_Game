@@ -1,44 +1,267 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Box Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-      body {
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #f0f0f0;
-      }
-      #gameContainer {
-        position: relative;
-        width: 400px;
-        height: 400px;
-      }
-      #background {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-image: url('/public/game-background.jpg');
-        background-size: cover;
-        z-index: -1;
-      }
-      canvas {
-        border: 1px solid black;
-        background-color: transparent;
-      }
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #000;
+            font-family: 'Press Start 2P', cursive;
+            color: #fff;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            border: 4px solid #fff;
+            box-shadow: 0 0 0 4px #000;
+        }
+
+        #background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/public/game-background.jpg');
+            background-size: cover;
+            z-index: -1;
+        }
+
+        canvas {
+            background-color: transparent;
+        }
+
+        #ui-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            text-shadow: 2px 2px #000;
+            z-index: 10;
+        }
+
+        #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.75);
+            display: none; /* Initially hidden */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 20;
+        }
+
+        #game-over-screen h2 {
+            font-size: 2rem;
+            text-shadow: 3px 3px #000;
+            margin-bottom: 1rem;
+        }
+
+        #game-over-screen p {
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        #play-again-button {
+            padding: 1rem 2rem;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #4CAF50;
+            border: 2px solid #fff;
+            cursor: pointer;
+            text-shadow: 2px 2px #000;
+        }
+
+        #play-again-button:hover {
+            background-color: #45a049;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div id="gameContainer">
-      <div id="background"></div>
-      <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="background"></div>
+        <div id="ui-container">
+            <div id="player-info">Player: <span id="player-name"></span></div>
+            <div id="score">Score: 0</div>
+        </div>
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div id="game-over-screen">
+            <h2>GAME OVER</h2>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <button id="play-again-button">Play Again</button>
+        </div>
     </div>
-    <script src="game.js"></script>
-  </body>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const playerNameDisplay = document.getElementById('player-name');
+        const scoreDisplay = document.getElementById('score');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const playAgainButton = document.getElementById('play-again-button');
+
+        let score = 0;
+        let gameOver = false;
+        let playername = localStorage.getItem('playername');
+
+        // Player
+        const player = {
+            x: 50,
+            y: 350,
+            width: 20,
+            height: 20,
+            color: 'blue',
+            velocityY: 0,
+            isJumping: false
+        };
+
+        // Obstacles
+        let obstacles = [];
+        let frameCount = 0;
+
+        function createObstacle() {
+            const obstacle = {
+                x: canvas.width,
+                y: 350,
+                width: 20,
+                height: 20,
+                color: 'red'
+            };
+            obstacles.push(obstacle);
+        }
+
+        function resetGame() {
+            score = 0;
+            gameOver = false;
+            obstacles = [];
+            frameCount = 0;
+            player.y = 350;
+            player.velocityY = 0;
+            player.isJumping = false;
+            gameOverScreen.style.display = 'none';
+            loop();
+        }
+
+        function update() {
+            if (gameOver) return;
+
+            // Update player position
+            player.y += player.velocityY;
+            player.velocityY += 0.5; // Gravity
+
+            // Ground collision
+            if (player.y > 350) {
+                player.y = 350;
+                player.velocityY = 0;
+                player.isJumping = false;
+            }
+
+            // Update obstacle positions
+            for (let i = 0; i < obstacles.length; i++) {
+                obstacles[i].x -= 5;
+                // Collision detection
+                if (
+                    player.x < obstacles[i].x + obstacles[i].width &&
+                    player.x + player.width > obstacles[i].x &&
+                    player.y < obstacles[i].y + obstacles[i].height &&
+                    player.height + player.y > obstacles[i].y
+                ) {
+                    endGame();
+                }
+            }
+
+            // Remove off-screen obstacles
+            obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
+
+            // Create new obstacles
+            frameCount++;
+            if (frameCount % 60 === 0) {
+                createObstacle();
+            }
+
+            // Update score
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+
+            // Draw obstacles
+            for (let i = 0; i < obstacles.length; i++) {
+                ctx.fillStyle = obstacles[i].color;
+                ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+            }
+        }
+
+        function loop() {
+            if (gameOver) return;
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        async function endGame() {
+            gameOver = true;
+            finalScoreDisplay.textContent = score;
+            gameOverScreen.style.display = 'flex';
+
+            // Save score to the server
+            if (playername) {
+                try {
+                    await fetch(`/player/${playername}/score`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ score: score })
+                    });
+                } catch (error) {
+                    console.error("Failed to save score:", error);
+                }
+            }
+        }
+
+        // Event Listeners
+        window.addEventListener('keydown', (e) => {
+            if ((e.code === 'Space' || e.code === 'Enter') && !player.isJumping) {
+                player.velocityY = -12; // Jump strength
+                player.isJumping = true;
+            }
+        });
+
+        playAgainButton.addEventListener('click', resetGame);
+
+        // Initial Setup
+        if (playername) {
+            playerNameDisplay.textContent = playername;
+        } else {
+            playerNameDisplay.textContent = 'Guest';
+        }
+
+        // Start the game loop
+        loop();
+    </script>
+</body>
 </html>
