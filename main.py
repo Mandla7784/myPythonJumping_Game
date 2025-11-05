@@ -21,11 +21,9 @@ class Player(db.Model):
     def __repr__(self):
         return f'<Player {self.playername}>'
 
-@app.cli.command("init-db")
-def init_db_command():
-    """Creates the database tables."""
+# Automatically create the database tables if they don't exist
+with app.app_context():
     db.create_all()
-    print("Initialized the database.")
 
 @app.route('/signup', methods=['POST'])
 def signup():

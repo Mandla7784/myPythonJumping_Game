@@ -188,21 +188,61 @@
 
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            showMessage(signupMessage, ''); // Clear previous messages
             const playername = document.getElementById('signupPlayername').value;
             const password = document.getElementById('signupPassword').value;
 
-            const response = await fetch('/signup', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ playername, password })
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                 showMessage(signupMessage, data.message, true);
-            } else {
+            try {
+                // Step 1: Attempt to sign up
+                const signupResponse = await fetch('/signup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ playername, password })
+                });
+
+                if (!signupResponse.ok) {
+                    let errorMessage = 'Signup failed. Please try again.';
+                    try {
+                        const signupData = await signupResponse.json();
+                        errorMessage = signupData.message || errorMessage;
+                    } catch (err) {
+                        errorMessage = `Error: ${signupResponse.status} ${signupResponse.statusText}`;
+                    }
+                    showMessage(signupMessage, errorMessage, true);
+                    return;
+                }
+
+                // Step 2: If signup is successful, attempt to log in immediately
                 showMessage(signupMessage, 'Account created! Logging in...');
-                localStorage.setItem('playername', playername);
-                window.location.href = '/game';
+
+                const loginResponse = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ playername, password })
+                });
+
+                if (!loginResponse.ok) {
+                    let loginErrorMessage = 'Automatic login failed. Please try logging in manually.';
+                     try {
+                        const loginData = await loginResponse.json();
+                        loginErrorMessage = loginData.message || loginErrorMessage;
+                    } catch (err) {
+                         loginErrorMessage = `Error: ${loginResponse.status} ${loginResponse.statusText}`;
+                    }
+                    // Show error on the login form's message area and switch view
+                    showMessage(loginMessage, loginErrorMessage, true);
+                    signupFormContainer.style.display = 'none';
+                    loginFormContainer.style.display = 'block';
+
+                } else {
+                    // Step 3: If login is successful, store playername and redirect
+                    localStorage.setItem('playername', playername);
+                    window.location.href = '/game';
+                }
+
+            } catch (error) {
+                // Handle network errors etc.
+                showMessage(signupMessage, 'An unexpected error occurred. Please check your connection.', true);
             }
         });
     </script>
