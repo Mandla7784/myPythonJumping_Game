@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login / Sign Up</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         body {
             background-image: url("/public/game-background.jpg");
@@ -14,82 +16,134 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: 'Press Start 2P', cursive;
+            color: #fff;
+            text-shadow: 2px 2px #000;
         }
-        .card {
-            background-color: rgba(255, 255, 255, 0.8);
+        .container {
+            background-color: rgba(0, 0, 0, 0.75);
+            border: 4px solid #fff;
+            padding: 2rem;
+            box-shadow: 0 0 0 4px #000;
+            width: 90%;
+            max-width: 500px;
+        }
+        h2 {
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.8rem;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 2px solid #fff;
+            background-color: #333;
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            box-sizing: border-box; /* To include padding and border in the element's total width */
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #ff0;
+        }
+        button {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #fff;
+            background-color: #4CAF50; /* A classic green */
+            color: #fff;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 1rem;
+            cursor: pointer;
+            text-shadow: 2px 2px #000;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #signup-form button {
+            background-color: #008CBA; /* A blue for sign up */
+        }
+        #signup-form button:hover {
+            background-color: #007ba7;
+        }
+        .form-toggle {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .form-toggle a {
+            color: #ff0;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+        #signup-form {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header">
-                        <ul class="nav nav-tabs card-header-tabs">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="login-tab" href="#">Login</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="signup-tab" href="#">Sign Up</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="card-body">
-                        <div id="login-form">
-                            <h5 class="card-title">Login</h5>
-                            <form id="loginForm">
-                                <div class="form-group">
-                                    <label for="loginPlayername">Playername</label>
-                                    <input type="text" class="form-control" id="loginPlayername" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="loginPassword">Password</label>
-                                    <input type="password" class="form-control" id="loginPassword" required>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Login</button>
-                            </form>
-                        </div>
-                        <div id="signup-form" style="display: none;">
-                            <h5 class="card-title">Sign Up</h5>
-                            <form id="signupForm">
-                                <div class="form-group">
-                                    <label for="signupPlayername">Playername</label>
-                                    <input type="text" class="form-control" id="signupPlayername" required>
-                                </div>
-                                <div class="form-group">
-                                    <label for="signupPassword">Password</label>
-                                    <input type="password" class="form-control" id="signupPassword" required>
-                                </div>
-                                <button type="submit" class="btn btn-success">Sign Up</button>
-                            </form>
-                        </div>
-                    </div>
+        <div id="login-form">
+            <h2>LOGIN</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginPlayername">Player</label>
+                    <input type="text" id="loginPlayername" required>
                 </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit">START GAME</button>
+            </form>
+            <div class="form-toggle">
+                <p>New player? <a id="show-signup">Sign Up</a></p>
+            </div>
+        </div>
+
+        <div id="signup-form">
+            <h2>SIGN UP</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="signupPlayername">Player</label>
+                    <input type="text" id="signupPlayername" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" required>
+                </div>
+                <button type="submit">CREATE ACCOUNT</button>
+            </form>
+            <div class="form-toggle">
+                <p>Have an account? <a id="show-login">Login</a></p>
             </div>
         </div>
     </div>
 
     <script>
-        const loginTab = document.getElementById('login-tab');
-        const signupTab = document.getElementById('signup-tab');
-        const loginForm = document.getElementById('login-form');
-        const signupForm = document.getElementById('signup-form');
+        const showSignup = document.getElementById('show-signup');
+        const showLogin = document.getElementById('show-login');
+        const loginFormContainer = document.getElementById('login-form');
+        const signupFormContainer = document.getElementById('signup-form');
 
-        loginTab.addEventListener('click', (e) => {
+        showSignup.addEventListener('click', (e) => {
             e.preventDefault();
-            loginTab.classList.add('active');
-            signupTab.classList.remove('active');
-            loginForm.style.display = 'block';
-            signupForm.style.display = 'none';
+            loginFormContainer.style.display = 'none';
+            signupFormContainer.style.display = 'block';
         });
 
-        signupTab.addEventListener('click', (e) => {
+        showLogin.addEventListener('click', (e) => {
             e.preventDefault();
-            signupTab.classList.add('active');
-            loginTab.classList.remove('active');
-            signupForm.style.display = 'block';
-            loginForm.style.display = 'none';
+            signupFormContainer.style.display = 'none';
+            loginFormContainer.style.display = 'block';
         });
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -99,16 +153,14 @@
 
             const response = await fetch('/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ playername, password })
             });
 
             const data = await response.json();
-            alert(data.message);
-
-            if (response.ok) {
+            if (!response.ok) {
+                alert(data.message);
+            } else {
                 localStorage.setItem('playername', playername);
                 window.location.href = '/game';
             }
@@ -121,14 +173,16 @@
 
             const response = await fetch('/signup', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ playername, password })
             });
-
             const data = await response.json();
             alert(data.message);
+            if (response.ok) {
+                // Switch to login form after successful signup
+                signupFormContainer.style.display = 'none';
+                loginFormContainer.style.display = 'block';
+            }
         });
     </script>
 </body>
