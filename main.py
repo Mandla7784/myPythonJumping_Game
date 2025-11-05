@@ -1,3 +1,4 @@
+
 import os
 from flask import Flask, send_from_directory, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -20,14 +21,26 @@ class Player(db.Model):
     def __repr__(self):
         return f'<Player {self.playername}>'
 
+@app.cli.command("init-db")
+def init_db_command():
+    """Creates the database tables."""
+    db.create_all()
+    print("Initialized the database.")
+
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
+    if not data or not data.get('playername') or not data.get('password'):
+        return jsonify({'message': 'Missing playername or password'}), 400
+
+    if Player.query.filter_by(playername=data['playername']).first():
+        return jsonify({'message': 'Playername already exists!'}), 409
+
     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
     new_player = Player(playername=data['playername'], password=hashed_password)
     db.session.add(new_player)
     db.session.commit()
-    return jsonify({'message': 'New player created!'})
+    return jsonify({'message': 'New player created!'}), 201
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -60,29 +73,21 @@ def update_score(playername):
     db.session.commit()
     return jsonify({'message': 'Player data updated!'})
 
-
-@app.route("/")
+@app.route('/')
 def index():
-    return send_from_directory("src", "login.html")
+    return send_from_directory('src', 'login.html')
 
-@app.route("/game")
+@app.route('/game')
 def game():
-    return send_from_directory("src", "index.html")
+    return send_from_directory('src', 'index.html')
 
-@app.route("/public/<path:path>")
+@app.route('/public/<path:path>')
 def serve_public(path):
-    return send_from_directory("public", path)
+    return send_from_directory('public', path)
 
-@app.route("/<path:path>")
+@app.route('/<path:path>')
 def serve_static(path):
-    return send_from_directory("src", path)
+    return send_from_directory('src', path)
 
-
-def main():
-    with app.app_context():
-        db.create_all()
-    app.run(port=int(os.environ.get("PORT", 80)))
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    app.run(debug=True, port=int(os.environ.get('PORT', 8080)))

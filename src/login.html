@@ -31,7 +31,17 @@
         h2 {
             font-size: 1.5rem;
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
+        }
+        .message {
+            text-align: center;
+            min-height: 20px;
+            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            color: #ff0;
+        }
+        .message.error {
+            color: #f00;
         }
         .form-group {
             margin-bottom: 1.5rem;
@@ -49,7 +59,7 @@
             color: #fff;
             font-family: 'Press Start 2P', cursive;
             font-size: 1rem;
-            box-sizing: border-box; /* To include padding and border in the element's total width */
+            box-sizing: border-box; 
         }
         input[type="text"]:focus, input[type="password"]:focus {
             outline: none;
@@ -59,7 +69,7 @@
             width: 100%;
             padding: 1rem;
             border: 2px solid #fff;
-            background-color: #4CAF50; /* A classic green */
+            background-color: #4CAF50;
             color: #fff;
             font-family: 'Press Start 2P', cursive;
             font-size: 1rem;
@@ -70,7 +80,7 @@
             background-color: #45a049;
         }
         #signup-form button {
-            background-color: #008CBA; /* A blue for sign up */
+            background-color: #008CBA;
         }
         #signup-form button:hover {
             background-color: #007ba7;
@@ -93,6 +103,7 @@
     <div class="container">
         <div id="login-form">
             <h2>LOGIN</h2>
+            <div class="message" id="login-message"></div>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="loginPlayername">Player</label>
@@ -111,6 +122,7 @@
 
         <div id="signup-form">
             <h2>SIGN UP</h2>
+            <div class="message" id="signup-message"></div>
             <form id="signupForm">
                 <div class="form-group">
                     <label for="signupPlayername">Player</label>
@@ -133,6 +145,13 @@
         const showLogin = document.getElementById('show-login');
         const loginFormContainer = document.getElementById('login-form');
         const signupFormContainer = document.getElementById('signup-form');
+        const loginMessage = document.getElementById('login-message');
+        const signupMessage = document.getElementById('signup-message');
+
+        function showMessage(element, message, isError = false) {
+            element.textContent = message;
+            element.className = isError ? 'message error' : 'message';
+        }
 
         showSignup.addEventListener('click', (e) => {
             e.preventDefault();
@@ -159,8 +178,9 @@
 
             const data = await response.json();
             if (!response.ok) {
-                alert(data.message);
+                showMessage(loginMessage, data.message, true);
             } else {
+                showMessage(loginMessage, data.message);
                 localStorage.setItem('playername', playername);
                 window.location.href = '/game';
             }
@@ -177,11 +197,12 @@
                 body: JSON.stringify({ playername, password })
             });
             const data = await response.json();
-            alert(data.message);
-            if (response.ok) {
-                // Switch to login form after successful signup
-                signupFormContainer.style.display = 'none';
-                loginFormContainer.style.display = 'block';
+            if (!response.ok) {
+                 showMessage(signupMessage, data.message, true);
+            } else {
+                showMessage(signupMessage, 'Account created! Logging in...');
+                localStorage.setItem('playername', playername);
+                window.location.href = '/game';
             }
         });
     </script>
