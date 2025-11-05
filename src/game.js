@@ -10,7 +10,7 @@ const player = {
   width: 50,
   height: 50,
   color: 'blue',
-  speed: 20,
+  speed: 10,
   velocityY: 0,
   isJumping: false,
   jumpStrength: 15
