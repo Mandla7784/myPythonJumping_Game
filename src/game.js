@@ -1,129 +1,164 @@
-
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
+const playerNameDisplay = document.getElementById('player-name');
+const scoreDisplay = document.getElementById('score');
+const gameOverScreen = document.getElementById('game-over-screen');
+const finalScoreDisplay = document.getElementById('final-score');
+const playAgainButton = document.getElementById('play-again-button');
 const background = document.getElementById('background');
 
-// Player properties
+let score = 0;
+let gameOver = false;
+let playername = localStorage.getItem('playername');
+const playerColors = ['blue', '#00FF00', '#FFFF00', '#FF00FF', '#FFA500'];
+let colorIndex = 0;
+let backgroundX = 0;
+
+// Player
 const player = {
-  x: 50,
-  y: canvas.height - 50, // Start player on the ground
-  width: 50,
-  height: 50,
-  color: 'blue',
-  speed: 10,
-  velocityY: 0,
-  isJumping: false,
-  jumpStrength: 15
+    x: 50,
+    y: 350,
+    width: 20,
+    height: 20,
+    color: playerColors[colorIndex],
+    velocityY: 0,
+    isJumping: false
 };
 
-const gravity = 0.8;
-let backgroundX = 0;
-const obstacles = [];
-let gameOver = false;
+// Obstacles
+let obstacles = [];
+let frameCount = 0;
 
-// Function to draw the player
-function drawPlayer() {
-  ctx.fillStyle = player.color;
-  ctx.fillRect(player.x, player.y, player.width, player.height);
+function createObstacle() {
+    const obstacle = {
+        x: canvas.width,
+        y: 350,
+        width: 20,
+        height: 20,
+        color: 'red'
+    };
+    obstacles.push(obstacle);
 }
 
-// Function to draw obstacles
-function drawObstacles() {
-  ctx.fillStyle = 'green';
-  obstacles.forEach(obstacle => {
-    ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
-  });
-}
-
-// Keyboard input handler for jumping
-document.addEventListener('keydown', function(event) {
-  if (event.code === 'Enter' && !player.isJumping) {
-    player.velocityY = -player.jumpStrength;
-    player.isJumping = true;
-  }
-  if (event.code === 'c' && player.color === 'red') {
-    player.color = 'blue';
-  } else if (event.code === 'c' && player.color === 'blue') {
-    player.color = 'red';
-  }
-});
-
-// Function to add obstacles
-function addObstacle() {
-  const obstacle = {
-    x: canvas.width,
-    y: canvas.height - 50,
-    width: 20,
-    height: 50,
-  };
-  obstacles.push(obstacle);
-}
-
-// Function to detect collision
-function detectCollision() {
-  obstacles.forEach(obstacle => {
-    if (
-      player.x < obstacle.x + obstacle.width &&
-      player.x + player.width > obstacle.x &&
-      player.y < obstacle.y + obstacle.height &&
-      player.y + player.height > obstacle.y
-    ) {
-      gameOver = true;
-    }
-  });
-}
-
-// Game loop
-function gameLoop() {
-  if (gameOver) {
-    ctx.fillStyle = 'red';
-    ctx.font = '50px Arial';
-    ctx.fillText('Game Over', canvas.width / 2 - 150, canvas.height / 2);
-    return;
-  }
-
-  // Clear the canvas for the next frame
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // Apply gravity
-  player.velocityY += gravity;
-  player.y += player.velocityY;
-
-  // Ground collision detection
-  if (player.y + player.height > canvas.height) {
-    player.y = canvas.height - player.height; // Snap to ground
+function resetGame() {
+    score = 0;
+    gameOver = false;
+    obstacles = [];
+    frameCount = 0;
+    player.y = 350;
     player.velocityY = 0;
     player.isJumping = false;
-  }
-
-  // Move the background to give the illusion of player movement
-  backgroundX -= player.speed;
-  if (backgroundX <= -canvas.width) {
     backgroundX = 0;
-  }
-  background.style.backgroundPositionX = backgroundX + 'px';
+    gameOverScreen.style.display = 'none';
+    loop();
+}
 
-  // Add new obstacles
-  if (Math.random() < 0.02) {
-    addObstacle();
-  }
+function update() {
+    if (gameOver) return;
 
-  // Move and draw obstacles
-  obstacles.forEach(obstacle => {
-    obstacle.x -= player.speed;
-  });
+    // Move background for parallax effect
+    backgroundX -= 2; 
+    background.style.backgroundPositionX = backgroundX + 'px';
 
-  drawObstacles();
+    // Update player position
+    player.y += player.velocityY;
+    player.velocityY += 0.5; // Gravity
 
-  // Detect collision
-  detectCollision();
+    // Ground collision
+    if (player.y > 350) {
+        player.y = 350;
+        player.velocityY = 0;
+        player.isJumping = false;
+    }
 
-  // Draw the player at its new position
-  drawPlayer();
+    // Update obstacle positions
+    for (let i = 0; i < obstacles.length; i++) {
+        obstacles[i].x -= 5;
+        // Collision detection
+        if (
+            player.x < obstacles[i].x + obstacles[i].width &&
+            player.x + player.width > obstacles[i].x &&
+            player.y < obstacles[i].y + obstacles[i].height &&
+            player.height + player.y > obstacles[i].y
+        ) {
+            endGame();
+        }
+    }
 
-  // Request the next animation frame
-  requestAnimationFrame(gameLoop);
+    // Remove off-screen obstacles
+    obstacles = obstacles.filter(obstacle => obstacle.x + obstacle.width > 0);
+
+    // Create new obstacles
+    frameCount++;
+    if (frameCount % 60 === 0) {
+        createObstacle();
+    }
+
+    // Update score
+    score++;
+    scoreDisplay.textContent = `Score: ${score}`;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw player
+    ctx.fillStyle = player.color;
+    ctx.fillRect(player.x, player.y, player.width, player.height);
+
+    // Draw obstacles
+    for (let i = 0; i < obstacles.length; i++) {
+        ctx.fillStyle = obstacles[i].color;
+        ctx.fillRect(obstacles[i].x, obstacles[i].y, obstacles[i].width, obstacles[i].height);
+    }
+}
+
+function loop() {
+    if (gameOver) return;
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+async function endGame() {
+    gameOver = true;
+    finalScoreDisplay.textContent = score;
+    gameOverScreen.style.display = 'flex';
+
+    // Save score to the server
+    if (playername) {
+        try {
+            await fetch(`/player/${playername}/score`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ score: score })
+            });
+        } catch (error) {
+            console.error("Failed to save score:", error);
+        }
+    }
+}
+
+// Event Listeners
+window.addEventListener('keydown', (e) => {
+    if ((e.code === 'Space' || e.code === 'Enter') && !player.isJumping) {
+        player.velocityY = -12; // Jump strength
+        player.isJumping = true;
+    }
+    if (e.code === 'KeyC') {
+        colorIndex = (colorIndex + 1) % playerColors.length;
+        player.color = playerColors[colorIndex];
+    }
+});
+
+playAgainButton.addEventListener('click', resetGame);
+
+// Initial Setup
+if (playername) {
+    playerNameDisplay.textContent = playername;
+} else {
+    playerNameDisplay.textContent = 'Guest';
 }
 
 // Start the game loop
-gameLoop();
+loop();
