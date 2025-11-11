@@ -55,6 +55,16 @@
             z-index: 10;
         }
 
+        #rules-container {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            text-align: center;
+            text-shadow: 2px 2px #000;
+            z-index: 10;
+        }
+
         #game-over-screen {
             position: absolute;
             top: 0;
@@ -109,6 +119,10 @@
             <h2>GAME OVER</h2>
             <p>Final Score: <span id="final-score">0</span></p>
             <button id="play-again-button">Play Again</button>
+        </div>
+        <div id="rules-container">
+            <p>Press Enter/Space to Jump</p>
+            <p>Press C to Change Color</p>
         </div>
     </div>
 
