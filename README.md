@@ -35,4 +35,4 @@ Follow these steps to set up the project locally.
 
 ```bash
 git clone https://github.com/Mandla7784/myPythonJumping_Game.git
-cd jumping-game-flask
+cd myPythonJumping_Game
