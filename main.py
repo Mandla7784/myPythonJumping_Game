@@ -71,6 +71,26 @@ def update_score(playername):
     db.session.commit()
     return jsonify({'message': 'Player data updated!'})
 
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    data = request.get_json()
+    message = data['message'].lower()
+    reply = ""
+
+    if 'jump' in message:
+        reply = "You can jump by pressing the Enter or Spacebar."
+    elif 'color' in message:
+        reply = "You can change your color by pressing the 'C' key."
+    elif 'score' in message:
+        reply = "You get points by surviving. The longer you last, the higher your score!"
+    elif 'name' in message or 'who are you' in message:
+        reply = "I am a helpful chatbot for this game!"
+    else:
+        reply = "I'm not sure how to answer that. You can ask me about jumping, changing color, or the score."
+
+    return jsonify({'reply': reply})
+
+
 @app.route('/')
 def index():
     return send_from_directory('src', 'login.html')
